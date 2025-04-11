@@ -1,75 +1,46 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>App Redirect</title>
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        margin: 0;
-        padding: 20px;
-        text-align: center;
-      }
-      h1 {
-        margin-top: 50px;
-      }
-    </style>
-  </head>
-  <body>
-    <div id="root"></div>
-
-    <!-- Load React and ReactDOM via CDN -->
-    <script
-      crossorigin
-      src="https://unpkg.com/react@17/umd/react.development.js"
-    ></script>
-    <script
-      crossorigin
-      src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"
-    ></script>
-    <!-- Load Babel for in-browser JSX compilation -->
-    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
-
-    <!-- Our React Code -->
-    <script type="text/babel">
-      function App() {
-        React.useEffect(() => {
-          // Deep link URL: Replace 'yourapp' with your actual custom scheme/path
-          const deepLinkUrl = 'instagram://user?username=instagram://open';
-          // const deepLinkUrl = 'yourapp://open';
-          // Fallback: Play Store URL for your app (adjust package name as necessary)
-          const playStoreUrl =
-            'https://play.google.com/store/apps/details?id=com.google.android.apps.maps';
-
-          // Attempt to open the app using deep linking
-          const fallbackTimeout = setTimeout(() => {
-            // If the deep link fails (likely app not installed), redirect to Play Store
-            window.location.href = playStoreUrl;
-          }, 1500); // 1.5 seconds timeout
-
-          // Initiate deep linking
-          window.location.href = deepLinkUrl;
-
-          // Clean up the timeout if the component unmounts
-          return () => clearTimeout(fallbackTimeout);
-        }, []);
-
-        return (
-          <div>
-            <h1>Redirecting you to our app...</h1>
-            <p>
-              If you are not redirected automatically, please click{" "}
-              <a href="https://play.google.com/store/apps/details?id=com.google.android.apps.maps">
-                here
-              </a>.
-            </p>
-          </div>
-        );
-      }
-
-      // Render our App component into the root element
-      ReactDOM.render(<App />, document.getElementById("root"));
-    </script>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>App Redirect</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+    }
+    h1 {
+      margin-top: 50px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Redirecting you to our app...</h1>
+  <p>
+    If you are not redirected automatically, please click
+    <a id="fallbackLink" href="https://play.google.com/store/apps/details?id=com.google.android.apps.maps">here</a>.
+  </p>
+ 
+  <script>
+    const deepLinkUrl = "instagram://user?username=instagram"; // Replace with your app's custom URI
+    const playStoreUrl = "https://play.google.com/store/apps/details?id=com.google.android.apps.maps"; // Replace with your Play Store URL
+ 
+    const fallbackTimeout = setTimeout(() => {
+      window.location.href = playStoreUrl;
+    }, 1500); // Wait 1.5s before redirecting to Play Store if deep link fails
+ 
+    // Attempt to open the app
+    window.location.href = deepLinkUrl;
+ 
+    // Optional: Clear timeout if needed when user leaves page early
+    window.addEventListener("beforeunload", () => {
+      clearTimeout(fallbackTimeout);
+    });
+ 
+    // Update fallback link just in case
+    document.getElementById("fallbackLink").href = playStoreUrl;
+  </script>
+</body>
 </html>
