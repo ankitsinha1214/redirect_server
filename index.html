@@ -20,40 +20,52 @@
   <h1>Redirecting you to our app...</h1>
   <p>
     If you are not redirected automatically, please click
-    <a id="fallbackLink" href="https://play.google.com/store/apps/details?id=com.example.app">here</a>.
+    <a id="fallbackLink" href="#">here</a>.
   </p>
- 
+
   <script>
-    const deepLinkUrl = "instagram://user?username=instagram"; // Replace with your app's URI
-    const playStoreUrl = "https://play.google.com/store/apps/details?id=com.google.android.apps.maps"; // Replace with your Play Store URL
- 
-    let hasNavigatedAway = false;
- 
-    // Detect if the user left the page (because app opened)
-    const beforeUnloadHandler = () => {
-      hasNavigatedAway = true;
-    };
- 
-    window.addEventListener("blur", beforeUnloadHandler); // Most reliable signal on mobile
- 
-    // Set up fallback to Play Store if app wasn't opened
-    const fallbackTimeout = setTimeout(() => {
-      if (!hasNavigatedAway) {
-        window.location.href = playStoreUrl;
+    (function () {
+      const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+      let deepLinkUrl = "";
+      let fallbackUrl = "";
+
+      if (/android/i.test(userAgent)) {
+        // Android
+        deepLinkUrl = "instagram://user?username=instagram"; // Replace with your deep link
+        fallbackUrl = "https://play.google.com/store/apps/details?id=com.instagram.android"; // Replace with your Play Store URL
+      } else if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
+        // iOS
+        deepLinkUrl = "instagram://user?username=instagram"; // Replace with your deep link
+        fallbackUrl = "https://apps.apple.com/us/app/instagram/id389801252"; // Replace with your App Store URL
+      } else {
+        // Fallback for non-mobile
+        document.getElementById("fallbackLink").innerText = "Please open this page on a mobile device.";
+        return;
       }
-    }, 1500);
- 
-    // Try opening the deep link
-    window.location.href = deepLinkUrl;
- 
-    // Clean up the event listener
-    window.addEventListener("beforeunload", () => {
-      clearTimeout(fallbackTimeout);
-      window.removeEventListener("blur", beforeUnloadHandler);
-    });
- 
-    // Update fallback link in case they click it
-    document.getElementById("fallbackLink").href = playStoreUrl;
+
+      document.getElementById("fallbackLink").href = fallbackUrl;
+
+      let hasNavigatedAway = false;
+      const beforeUnloadHandler = () => {
+        hasNavigatedAway = true;
+      };
+
+      window.addEventListener("blur", beforeUnloadHandler);
+
+      const fallbackTimeout = setTimeout(() => {
+        if (!hasNavigatedAway) {
+          window.location.href = fallbackUrl;
+        }
+      }, 1500);
+
+      // Try to open the deep link
+      window.location.href = deepLinkUrl;
+
+      window.addEventListener("beforeunload", () => {
+        clearTimeout(fallbackTimeout);
+        window.removeEventListener("blur", beforeUnloadHandler);
+      });
+    })();
   </script>
 </body>
 </html>
