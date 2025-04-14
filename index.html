@@ -14,58 +14,81 @@
     h1 {
       margin-top: 50px;
     }
+    button {
+      margin-top: 30px;
+      padding: 12px 20px;
+      font-size: 16px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
   </style>
 </head>
 <body>
-  <h1>Redirecting you to our app...</h1>
-  <p>
-    If you are not redirected automatically, please click
-    <a id="fallbackLink" href="#">here</a>.
+  <h1>Redirecting to App</h1>
+  <p id="infoText">
+    If you're not redirected automatically, click the button below:
   </p>
-
+  <button id="openAppBtn" style="display: none;">Open App</button>
+  <p>
+    Or click <a id="fallbackLink" href="#">here</a> to go to the store.
+  </p>
+ 
   <script>
-    (function () {
-      const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-      let deepLinkUrl = "";
-      let fallbackUrl = "";
-
-      if (/android/i.test(userAgent)) {
-        // Android
-        deepLinkUrl = "instagram://user?username=instagram"; // Replace with your deep link
-        fallbackUrl = "https://play.google.com/store/apps/details?id=com.instagram.android"; // Replace with your Play Store URL
-      } else if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
-        // iOS
-        deepLinkUrl = "instagram://user?username=instagram"; // Replace with your deep link
-        fallbackUrl = "https://apps.apple.com/us/app/instagram/id389801252"; // Replace with your App Store URL
-      } else {
-        // Fallback for non-mobile
-        document.getElementById("fallbackLink").innerText = "Please open this page on a mobile device.";
-        return;
-      }
-
-      document.getElementById("fallbackLink").href = fallbackUrl;
-
+    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+    let deepLinkUrl = "instagram://user?username=instagram"; // 🔁 Replace with your deep link
+    let fallbackUrlAndroid = "https://play.google.com/store/apps/details?id=com.instagram.android";
+    let fallbackUrlIOS = "https://apps.apple.com/us/app/instagram/id389801252";
+    let isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
+    let isAndroid = /android/i.test(userAgent);
+ 
+    const fallbackLink = document.getElementById("fallbackLink");
+    const openAppBtn = document.getElementById("openAppBtn");
+ 
+    function openDeepLink(deepLink, fallbackUrl) {
       let hasNavigatedAway = false;
+ 
       const beforeUnloadHandler = () => {
         hasNavigatedAway = true;
       };
-
+ 
       window.addEventListener("blur", beforeUnloadHandler);
-
+ 
       const fallbackTimeout = setTimeout(() => {
         if (!hasNavigatedAway) {
           window.location.href = fallbackUrl;
         }
       }, 1500);
-
-      // Try to open the deep link
-      window.location.href = deepLinkUrl;
-
+ 
+      window.location.href = deepLink;
+ 
       window.addEventListener("beforeunload", () => {
         clearTimeout(fallbackTimeout);
         window.removeEventListener("blur", beforeUnloadHandler);
       });
-    })();
+    }
+ 
+    if (isAndroid) {
+      fallbackLink.href = fallbackUrlAndroid;
+      openDeepLink(deepLinkUrl, fallbackUrlAndroid);
+    } else if (isIOS) {
+      fallbackLink.href = fallbackUrlIOS;
+      openAppBtn.style.display = "inline-block";
+ 
+      openAppBtn.addEventListener("click", () => {
+        openDeepLink(deepLinkUrl, fallbackUrlIOS);
+      });
+    } else {
+      // Unsupported or desktop
+      document.getElementById("infoText").textContent = "Please open this page on a mobile device.";
+      fallbackLink.href = "https://play.google.com/store/apps/details?id=com.instagram.android";
+    }
   </script>
 </body>
 </html>
+ 
