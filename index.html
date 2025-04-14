@@ -79,7 +79,7 @@
     } else if (isIOS) {
       fallbackLink.href = fallbackUrlIOS;
       openAppBtn.style.display = "inline-block";
- 
+      openDeepLink(deepLinkUrl, fallbackUrlIOS);
       openAppBtn.addEventListener("click", () => {
         openDeepLink(deepLinkUrl, fallbackUrlIOS);
       });
@@ -91,4 +91,3 @@
   </script>
 </body>
 </html>
- 
