@@ -20,26 +20,39 @@
   <h1>Redirecting you to our app...</h1>
   <p>
     If you are not redirected automatically, please click
-    <a id="fallbackLink" href="https://play.google.com/store/apps/details?id=com.google.android.apps.maps">here</a>.
+    <a id="fallbackLink" href="https://play.google.com/store/apps/details?id=com.example.app">here</a>.
   </p>
  
   <script>
-    const deepLinkUrl = "instagram://user?username=instagram"; // Replace with your app's custom URI
+    const deepLinkUrl = "instagram://user?username=instagram"; // Replace with your app's URI
     const playStoreUrl = "https://play.google.com/store/apps/details?id=com.google.android.apps.maps"; // Replace with your Play Store URL
  
-    const fallbackTimeout = setTimeout(() => {
-      window.location.href = playStoreUrl;
-    }, 1500); // Wait 1.5s before redirecting to Play Store if deep link fails
+    let hasNavigatedAway = false;
  
-    // Attempt to open the app
+    // Detect if the user left the page (because app opened)
+    const beforeUnloadHandler = () => {
+      hasNavigatedAway = true;
+    };
+ 
+    window.addEventListener("blur", beforeUnloadHandler); // Most reliable signal on mobile
+ 
+    // Set up fallback to Play Store if app wasn't opened
+    const fallbackTimeout = setTimeout(() => {
+      if (!hasNavigatedAway) {
+        window.location.href = playStoreUrl;
+      }
+    }, 1500);
+ 
+    // Try opening the deep link
     window.location.href = deepLinkUrl;
  
-    // Optional: Clear timeout if needed when user leaves page early
+    // Clean up the event listener
     window.addEventListener("beforeunload", () => {
       clearTimeout(fallbackTimeout);
+      window.removeEventListener("blur", beforeUnloadHandler);
     });
  
-    // Update fallback link just in case
+    // Update fallback link in case they click it
     document.getElementById("fallbackLink").href = playStoreUrl;
   </script>
 </body>
