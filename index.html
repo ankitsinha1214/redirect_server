@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>App Redirect</title>
   <style>
     body {
@@ -11,9 +12,11 @@
       padding: 20px;
       text-align: center;
     }
+
     h1 {
       margin-top: 50px;
     }
+
     button {
       margin-top: 30px;
       padding: 12px 20px;
@@ -24,11 +27,14 @@
       border-radius: 8px;
       cursor: pointer;
     }
+
     button:hover {
       background-color: #0056b3;
     }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/crypto-js@4.1.1/crypto-js.min.js"></script>
 </head>
+
 <body>
   <h1>Redirecting to App</h1>
   <p id="infoText">
@@ -38,57 +44,110 @@
   <p>
     Or click <a id="fallbackLink" href="#">here</a> to go to the store.
   </p>
- 
+
   <script>
-    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-    let deepLinkUrl = "instagram://user?username=instagram"; // 🔁 Replace with your deep link
-    let fallbackUrlAndroid = "https://play.google.com/store/apps/details?id=com.instagram.android";
-    let fallbackUrlIOS = "https://apps.apple.com/us/app/instagram/id389801252";
-    let isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
-    let isAndroid = /android/i.test(userAgent);
- 
-    const fallbackLink = document.getElementById("fallbackLink");
-    const openAppBtn = document.getElementById("openAppBtn");
- 
+
+
+
     function openDeepLink(deepLink, fallbackUrl) {
       let hasNavigatedAway = false;
- 
+
       const beforeUnloadHandler = () => {
         hasNavigatedAway = true;
       };
- 
+
       window.addEventListener("blur", beforeUnloadHandler);
- 
+
       const fallbackTimeout = setTimeout(() => {
         if (!hasNavigatedAway) {
           window.location.href = fallbackUrl;
         }
       }, 1500);
- 
+
       window.location.href = deepLink;
- 
+
       window.addEventListener("beforeunload", () => {
         clearTimeout(fallbackTimeout);
         window.removeEventListener("blur", beforeUnloadHandler);
       });
     }
- 
-    if (isAndroid) {
-      fallbackLink.href = fallbackUrlAndroid;
-      openDeepLink(deepLinkUrl, fallbackUrlAndroid);
-    } else if (isIOS) {
-      fallbackLink.href = fallbackUrlIOS;
-      openAppBtn.style.display = "inline-block";
-      openDeepLink(deepLinkUrl, fallbackUrlIOS);
-      openAppBtn.addEventListener("click", () => {
-        openDeepLink(deepLinkUrl, fallbackUrlIOS);
-      });
-    } else {
-      // Unsupported or desktop
-      document.getElementById("infoText").textContent = "Please open this page on a mobile device.";
-      fallbackLink.href = "https://play.google.com/store/apps/details?id=com.instagram.android";
+
+    function isProbablyEncrypted(value) {
+      // Must be at least a certain length to be considered encrypted
+      if (!value || value.length < 20) return false;
+
+      // Should look like Base64
+      const base64Regex = /^[A-Za-z0-9+/=]+$/;
+
+      // Avoid strings that clearly contain JSON structure
+      if (value.includes("{") || value.includes(":")) return false;
+
+      // Decode attempt (safe)
+      try {
+        atob(value);
+      } catch (e) {
+        return false;
+      }
+
+      return base64Regex.test(value);
     }
+    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+    let isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
+    let isAndroid = /android/i.test(userAgent);
+
+    const fallbackLink = document.getElementById("fallbackLink");
+    const openAppBtn = document.getElementById("openAppBtn");
+
+
+    let deepLinkUrl; // 🔁 Replace with your deep link
+    let fallbackUrlAndroid = "https://play.google.com/store/apps/details?id=com.instagram.android";
+    let fallbackUrlIOS = "https://apps.apple.com/us/app/instagram/id389801252";
+
+    function getDecryptedJsonFromParam(paramName) {
+      const params = new URLSearchParams(window.location.search);
+      let encryptedData = params.get(paramName);
+
+      //to check if we have received correct params
+      if (!isProbablyEncrypted(encryptedData)) {
+        console.log("not encrypted");
+        return;
+      }
+
+      deepLinkUrl = `intent://scan?payload=${encryptedData}#Intent;` +
+        "scheme=chrgup;" +
+        "package=com.esyasoft.mobilityconsumer;" +
+        "end";
+      console.log(deepLinkUrl);
+      if (!encryptedData) {
+        //redirect it to play store
+        if (isAndroid) {
+          fallbackLink.href = fallbackUrlAndroid;
+        } else if (isIOS) {
+          fallbackLink.href = fallbackUrlIOS;
+          openAppBtn.addEventListener("click", () => {
+            openDeepLink(deepLinkUrl, fallbackUrlIOS);
+          });
+        }
+        else {
+          if (isAndroid) {
+            fallbackLink.href = fallbackUrlAndroid;
+            openDeepLink(deepLinkUrl, fallbackUrlAndroid);
+          } else if (isIOS) {
+            fallbackLink.href = fallbackUrlIOS;
+            openAppBtn.style.display = "inline-block";
+            openDeepLink(deepLinkUrl, fallbackUrlIOS);
+            openAppBtn.addEventListener("click", () => {
+              openDeepLink(deepLinkUrl, fallbackUrlIOS);
+            });
+          }
+        }
+      }
+    }
+
+    const data = getDecryptedJsonFromParam("data");
+
   </script>
+
 </body>
+
 </html>
-<!-- example -->
