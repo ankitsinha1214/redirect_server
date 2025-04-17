@@ -49,7 +49,7 @@
 
 
 
-    function openDeepLink(deepLink, fallbackUrl) {
+    function openDeepLink(deepLink, fallbackUrl, encryptedData) {
       let hasNavigatedAway = false;
       const start = Date.now();
 
@@ -144,18 +144,18 @@
         }
         else {
           fallbackLink.href = fallbackUrlAndroid;
-          console.log("you are in pc");
+          // console.log("you are in pc");
         }
         return;
       }
 
-      console.log("running");
+      // console.log("running");
 
       deepLinkUrl = `intent://scan?payload=${encryptedData}#Intent;` +
         "scheme=chrgup;" +
         "package=com.esyasoft.mobilityconsumer;" +
         "end";
-      console.log(deepLinkUrl);
+      // console.log(deepLinkUrl);
       // if (!encryptedData) {
       //   //redirect it to play store
       //   if (isAndroid) {
@@ -169,13 +169,13 @@
       //   else {
       if (isAndroid) {
         fallbackLink.href = fallbackUrlAndroid;
-        openDeepLink(deepLinkUrl, fallbackUrlAndroid);
+        openDeepLink(deepLinkUrl, fallbackUrlAndroid, encryptedData);
       } else if (isIOS) {
         fallbackLink.href = fallbackUrlIOS;
         openAppBtn.style.display = "inline-block";
-        openDeepLink(deepLinkUrl, fallbackUrlIOS);
+        openDeepLink(deepLinkUrl, fallbackUrlIOS, encryptedData);
         openAppBtn.addEventListener("click", () => {
-          openDeepLink(deepLinkUrl, fallbackUrlIOS);
+          openDeepLink(deepLinkUrl, fallbackUrlIOS, encryptedData);
         });
       }
       else {
