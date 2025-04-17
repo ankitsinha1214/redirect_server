@@ -83,7 +83,7 @@
       }
 
       if(isIOS){
-        window.location.href = "chrgup://";
+        window.location.href = `chrgup://scan?payload=${encryptedData}`;
       }
 
       // Cleanup
