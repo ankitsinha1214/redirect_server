@@ -108,10 +108,10 @@
       let encryptedData = params.get(paramName);
 
       //to check if we have received correct params
-      if (!isProbablyEncrypted(encryptedData)) {
-        console.log("not encrypted");
-        return;
-      }
+      // if (!isProbablyEncrypted(encryptedData)) {
+      //   console.log("not encrypted");
+      //   return;
+      // }
 
       deepLinkUrl = `intent://scan?payload=${encryptedData}#Intent;` +
         "scheme=chrgup;" +
