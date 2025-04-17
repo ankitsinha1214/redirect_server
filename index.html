@@ -32,7 +32,7 @@
       background-color: #0056b3;
     }
   </style>
-  
+
 </head>
 
 <body>
@@ -51,26 +51,42 @@
 
     function openDeepLink(deepLink, fallbackUrl) {
       let hasNavigatedAway = false;
+      const start = Date.now();
 
       const beforeUnloadHandler = () => {
         hasNavigatedAway = true;
       };
 
+      const visibilityHandler = () => {
+        if (document.hidden) {
+          hasNavigatedAway = true;
+        }
+      };
+
+      // Add both blur and visibility change listeners
       window.addEventListener("blur", beforeUnloadHandler);
+      document.addEventListener("visibilitychange", visibilityHandler);
 
       const fallbackTimeout = setTimeout(() => {
-        if (!hasNavigatedAway) {
+        const timeSpent = Date.now() - start;
+
+        // If user hasn't left the page or it was too quick (app not installed)
+        if (!hasNavigatedAway && timeSpent < 2000) {
           window.location.href = fallbackUrl;
         }
       }, 1500);
 
+      // Try opening the app via deep link
       window.location.href = deepLink;
 
+      // Cleanup
       window.addEventListener("beforeunload", () => {
         clearTimeout(fallbackTimeout);
         window.removeEventListener("blur", beforeUnloadHandler);
+        document.removeEventListener("visibilitychange", visibilityHandler);
       });
     }
+
 
     function isProbablyEncrypted(value) {
       // Must be at least a certain length to be considered encrypted
@@ -110,8 +126,19 @@
       let encryptedData = params.get(paramName);
 
       //to check if we have received correct params
-      if (!isProbablyEncrypted(encryptedData) && encryptedData!=null) {
+      if (!isProbablyEncrypted(encryptedData)) {
         console.log("not encrypted");
+        if (isAndroid) {
+          fallbackLink.href = fallbackUrlAndroid;
+          window.location.href = fallbackUrl;
+        } else if (isIOS) {
+          fallbackLink.href = fallbackUrlIOS;
+          window.location.href = fallbackUrl;
+        }
+        else {
+          fallbackLink.href = fallbackUrlAndroid;
+          console.log("you are in pc");
+        }
         return;
       }
 
@@ -133,21 +160,21 @@
       //     });
       //   }
       //   else {
-          if (isAndroid) {
-            fallbackLink.href = fallbackUrlAndroid;
-            openDeepLink(deepLinkUrl, fallbackUrlAndroid);
-          } else if (isIOS) {
-            fallbackLink.href = fallbackUrlIOS;
-            openAppBtn.style.display = "inline-block";
-            openDeepLink(deepLinkUrl, fallbackUrlIOS);
-            openAppBtn.addEventListener("click", () => {
-              openDeepLink(deepLinkUrl, fallbackUrlIOS);
-            });
-          }
-          else{
-            fallbackLink.href = fallbackUrlAndroid;
-          }
-        }
+      if (isAndroid) {
+        fallbackLink.href = fallbackUrlAndroid;
+        openDeepLink(deepLinkUrl, fallbackUrlAndroid);
+      } else if (isIOS) {
+        fallbackLink.href = fallbackUrlIOS;
+        openAppBtn.style.display = "inline-block";
+        openDeepLink(deepLinkUrl, fallbackUrlIOS);
+        openAppBtn.addEventListener("click", () => {
+          openDeepLink(deepLinkUrl, fallbackUrlIOS);
+        });
+      }
+      else {
+        fallbackLink.href = fallbackUrlAndroid;
+      }
+    }
     //   }
     // }
 
