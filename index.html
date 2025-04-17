@@ -71,13 +71,20 @@
         const timeSpent = Date.now() - start;
 
         // If user hasn't left the page or it was too quick (app not installed)
-        if (!hasNavigatedAway && timeSpent < 2000) {
+        if (!hasNavigatedAway && timeSpent < 3000) {
           window.location.href = fallbackUrl;
         }
-      }, 1500);
+      }, 2000);
 
       // Try opening the app via deep link
+      if(isAndroid)
+      {
       window.location.href = deepLink;
+      }
+
+      if(isIOS){
+        window.location.href = "CHRGUP://";
+      }
 
       // Cleanup
       window.addEventListener("beforeunload", () => {
