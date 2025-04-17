@@ -32,7 +32,7 @@
       background-color: #0056b3;
     }
   </style>
-  <script src="https://cdn.jsdelivr.net/npm/crypto-js@4.1.1/crypto-js.min.js"></script>
+  
 </head>
 
 <body>
@@ -91,6 +91,8 @@
 
       return base64Regex.test(value);
     }
+
+
     const userAgent = navigator.userAgent || navigator.vendor || window.opera;
     let isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
     let isAndroid = /android/i.test(userAgent);
@@ -108,27 +110,29 @@
       let encryptedData = params.get(paramName);
 
       //to check if we have received correct params
-      // if (!isProbablyEncrypted(encryptedData)) {
-      //   console.log("not encrypted");
-      //   return;
-      // }
+      if (!isProbablyEncrypted(encryptedData) && encryptedData!=null) {
+        console.log("not encrypted");
+        return;
+      }
+
+      console.log("running");
 
       deepLinkUrl = `intent://scan?payload=${encryptedData}#Intent;` +
         "scheme=chrgup;" +
         "package=com.esyasoft.mobilityconsumer;" +
         "end";
       console.log(deepLinkUrl);
-      if (!encryptedData) {
-        //redirect it to play store
-        if (isAndroid) {
-          fallbackLink.href = fallbackUrlAndroid;
-        } else if (isIOS) {
-          fallbackLink.href = fallbackUrlIOS;
-          openAppBtn.addEventListener("click", () => {
-            openDeepLink(deepLinkUrl, fallbackUrlIOS);
-          });
-        }
-        else {
+      // if (!encryptedData) {
+      //   //redirect it to play store
+      //   if (isAndroid) {
+      //     fallbackLink.href = fallbackUrlAndroid;
+      //   } else if (isIOS) {
+      //     fallbackLink.href = fallbackUrlIOS;
+      //     openAppBtn.addEventListener("click", () => {
+      //       window.location.href = fallbackUrl;
+      //     });
+      //   }
+      //   else {
           if (isAndroid) {
             fallbackLink.href = fallbackUrlAndroid;
             openDeepLink(deepLinkUrl, fallbackUrlAndroid);
@@ -140,9 +144,12 @@
               openDeepLink(deepLinkUrl, fallbackUrlIOS);
             });
           }
+          else{
+            fallbackLink.href = fallbackUrlAndroid;
+          }
         }
-      }
-    }
+    //   }
+    // }
 
     const data = getDecryptedJsonFromParam("data");
 
