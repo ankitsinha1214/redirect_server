@@ -46,7 +46,8 @@
   </p>
 
   <script>
-
+    const app_name = 'mobilityconsumer';
+    const app_url = 'chrgup'
 
 
     function openDeepLink(deepLink, fallbackUrl, encryptedData) {
@@ -83,7 +84,7 @@
       }
 
       if(isIOS){
-        window.location.href = `chrgup://scan?payload=${encryptedData}`;
+        window.location.href = `${app_url}://scan?payload=${encryptedData}`;
       }
 
       // Cleanup
@@ -127,6 +128,7 @@
     let deepLinkUrl; // 🔁 Replace with your deep link
     let fallbackUrlAndroid = "https://play.google.com/store/apps/details?id=com.instagram.android";
     let fallbackUrlIOS = "https://apps.apple.com/us/app/instagram/id389801252";
+    console.log(`this is deep ${app_name}`);
 
     function getDecryptedJsonFromParam(paramName) {
       const params = new URLSearchParams(window.location.search);
@@ -135,6 +137,7 @@
       //to check if we have received correct params
       if (!isProbablyEncrypted(encryptedData)) {
         console.log("not encrypted");
+       
         if (isAndroid) {
           fallbackLink.href = fallbackUrlAndroid;
           window.location.href = fallbackUrlAndroid;
@@ -148,13 +151,14 @@
         }
         return;
       }
-
+     
       // console.log("running");
 
       deepLinkUrl = `intent://scan?payload=${encryptedData}#Intent;` +
         "scheme=chrgup;" +
-        "package=com.esyasoft.mobilityconsumer;" +
+        `package=com.esyasoft.${app_name};` +
         "end";
+        
       // console.log(deepLinkUrl);
       // if (!encryptedData) {
       //   //redirect it to play store
