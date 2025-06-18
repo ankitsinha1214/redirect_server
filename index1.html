@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Opening ChrgUp – The Smarter Charging Experience</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+    }
+
+    h1 {
+      margin-top: 50px;
+    }
+
+    button {
+      margin-top: 30px;
+      padding: 12px 20px;
+      font-size: 16px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+
+</head>
+
+<body>
+  <h1>Redirecting to App</h1>
+  <p id="infoText">
+    If you're not redirected automatically, click the button below:
+  </p>
+  <button id="openAppBtn" style="display: none;">Open App</button>
+  <p>
+    Or click <a id="fallbackLink" href="#">here</a> to go to the store.
+  </p>
+
+  <script>
+    // for chrgup
+    // const app_name = 'mobilityconsumer';
+    // const app_url = 'chrgup'
+
+    // for dtc
+    const app_name = 'dtc';
+    const app_url = 'dtc'
+
+
+    function openDeepLink(deepLink, fallbackUrl, encryptedData) {
+      let hasNavigatedAway = false;
+      const start = Date.now();
+
+      const beforeUnloadHandler = () => {
+        hasNavigatedAway = true;
+      };
+
+      const visibilityHandler = () => {
+        if (document.hidden) {
+          hasNavigatedAway = true;
+        }
+      };
+
+      // Add both blur and visibility change listeners
+      window.addEventListener("blur", beforeUnloadHandler);
+      document.addEventListener("visibilitychange", visibilityHandler);
+
+      const fallbackTimeout = setTimeout(() => {
+        const timeSpent = Date.now() - start;
+
+        // If user hasn't left the page or it was too quick (app not installed)
+        if (!hasNavigatedAway && timeSpent < 3000) {
+          window.location.href = fallbackUrl;
+        }
+      }, 2000);
+
+      // Try opening the app via deep link
+      if(isAndroid)
+      {
+      window.location.href = deepLink;
+      }
+
+      if(isIOS){
+        window.location.href = `${app_url}://scan?payload=${encryptedData}`;
+      }
+
+      // Cleanup
+      window.addEventListener("beforeunload", () => {
+        clearTimeout(fallbackTimeout);
+        window.removeEventListener("blur", beforeUnloadHandler);
+        document.removeEventListener("visibilitychange", visibilityHandler);
+      });
+    }
+
+
+    function isProbablyEncrypted(value) {
+      // Must be at least a certain length to be considered encrypted
+      if (!value || value.length < 20) return false;
+
+      // Should look like Base64
+      const base64Regex = /^[A-Za-z0-9+/=]+$/;
+
+      // Avoid strings that clearly contain JSON structure
+      if (value.includes("{") || value.includes(":")) return false;
+
+      // Decode attempt (safe)
+      try {
+        atob(value);
+      } catch (e) {
+        return false;
+      }
+
+      return base64Regex.test(value);
+    }
+
+
+    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+    let isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
+    let isAndroid = /android/i.test(userAgent);
+
+    const fallbackLink = document.getElementById("fallbackLink");
+    const openAppBtn = document.getElementById("openAppBtn");
+
+
+    let deepLinkUrl; // 🔁 Replace with your deep link
+    let fallbackUrlAndroid = "https://play.google.com/store/apps/details?id=com.instagram.android";
+    let fallbackUrlIOS = "https://apps.apple.com/us/app/instagram/id389801252";
+    console.log(`this is deep ${app_name}`);
+
+    function getDecryptedJsonFromParam(paramName) {
+      const params = new URLSearchParams(window.location.search);
+      let encryptedData = params.get(paramName);
+
+      //to check if we have received correct params
+      if (!isProbablyEncrypted(encryptedData)) {
+        console.log("not encrypted");
+       
+        if (isAndroid) {
+          fallbackLink.href = fallbackUrlAndroid;
+          window.location.href = fallbackUrlAndroid;
+        } else if (isIOS) {
+          fallbackLink.href = fallbackUrlIOS;
+          window.location.href = fallbackUrlIOS;
+        }
+        else {
+          fallbackLink.href = fallbackUrlAndroid;
+          // console.log("you are in pc");
+        }
+        return;
+      }
+     
+      // console.log("running");
+
+      deepLinkUrl = `intent://scan?payload=${encryptedData}#Intent;` +
+        "scheme=chrgup;" +
+        `package=com.esyasoft.${app_name};` +
+        "end";
+        
+      // console.log(deepLinkUrl);
+      // if (!encryptedData) {
+      //   //redirect it to play store
+      //   if (isAndroid) {
+      //     fallbackLink.href = fallbackUrlAndroid;
+      //   } else if (isIOS) {
+      //     fallbackLink.href = fallbackUrlIOS;
+      //     openAppBtn.addEventListener("click", () => {
+      //       window.location.href = fallbackUrl;
+      //     });
+      //   }
+      //   else {
+      if (isAndroid) {
+        fallbackLink.href = fallbackUrlAndroid;
+        openDeepLink(deepLinkUrl, fallbackUrlAndroid, encryptedData);
+      } else if (isIOS) {
+        fallbackLink.href = fallbackUrlIOS;
+        openAppBtn.style.display = "inline-block";
+        openDeepLink(deepLinkUrl, fallbackUrlIOS, encryptedData);
+        openAppBtn.addEventListener("click", () => {
+          openDeepLink(deepLinkUrl, fallbackUrlIOS, encryptedData);
+        });
+      }
+      else {
+        fallbackLink.href = fallbackUrlAndroid;
+      }
+    }
+    //   }
+    // }
+
+    const data = getDecryptedJsonFromParam("data");
+
+  </script>
+
+</body>
+
+</html>
