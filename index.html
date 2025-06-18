@@ -48,11 +48,15 @@
   <script>
     // for chrgup
     const app_name = 'mobilityconsumer';
-    const app_url = 'chrgup'
+    const app_url = 'chrgup';
+    const redirect_link = 'https://play.google.com/store/apps/details?id=com.instagram.android';
+    
 
     // for dtc
     // const app_name = 'dtc';
-    // const app_url = 'dtc'
+    // const app_url = 'dtc';
+    // const redirect_link = 'https://drive.google.com/file/d/1GLXuLXkvxJVyU3Yy1q4MVzHLmlQ2tRlM/view?usp=sharing';
+    
 
 
     function openDeepLink(deepLink, fallbackUrl, encryptedData) {
@@ -131,8 +135,8 @@
 
 
     let deepLinkUrl; // 🔁 Replace with your deep link
-    let fallbackUrlAndroid = "https://play.google.com/store/apps/details?id=com.instagram.android";
-    let fallbackUrlIOS = "https://apps.apple.com/us/app/instagram/id389801252";
+    let fallbackUrlAndroid = redirect_link;
+    let fallbackUrlIOS = redirect_link;
     console.log(`this is deep ${app_name}`);
 
     function getDecryptedJsonFromParam(paramName) {
