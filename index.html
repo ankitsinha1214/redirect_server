@@ -49,14 +49,14 @@
     // for chrgup
     const app_name = 'mobilityconsumer';
     const app_url = 'chrgup';
-    const redirect_link = 'https://play.google.com/store/apps/details?id=com.instagram.android';
-    
+    const redirect_link = 'https://firebasestorage.googleapis.com/v0/b/mindscape-3a832.appspot.com/o/DTC%20APP%2Fdtc_android.apk?alt=media&token=334c89a7-db2a-413c-ac9d-9bc0f213a463';
+
 
     // for dtc
     // const app_name = 'dtc';
     // const app_url = 'dtc';
     // const redirect_link = 'https://drive.google.com/file/d/1GLXuLXkvxJVyU3Yy1q4MVzHLmlQ2tRlM/view?usp=sharing';
-    
+
 
 
     function openDeepLink(deepLink, fallbackUrl, encryptedData) {
@@ -87,12 +87,11 @@
       }, 2000);
 
       // Try opening the app via deep link
-      if(isAndroid)
-      {
-      window.location.href = deepLink;
+      if (isAndroid) {
+        window.location.href = deepLink;
       }
 
-      if(isIOS){
+      if (isIOS) {
         window.location.href = `${app_url}://scan?payload=${encryptedData}`;
       }
 
@@ -146,7 +145,7 @@
       //to check if we have received correct params
       if (!isProbablyEncrypted(encryptedData)) {
         console.log("not encrypted");
-       
+
         if (isAndroid) {
           fallbackLink.href = fallbackUrlAndroid;
           window.location.href = fallbackUrlAndroid;
@@ -160,14 +159,14 @@
         }
         return;
       }
-     
+
       // console.log("running");
 
       deepLinkUrl = `intent://scan?payload=${encryptedData}#Intent;` +
         "scheme=chrgup;" +
         `package=com.esyasoft.${app_name};` +
         "end";
-        
+
       // console.log(deepLinkUrl);
       // if (!encryptedData) {
       //   //redirect it to play store
